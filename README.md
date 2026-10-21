@@ -1,2 +1,136 @@
-# live-timer-site
-A static countdown website with a live timer for 12 days or any custom number of days, ready for GitHub Pages.
+const STORAGE_KEY = 'our-together-list-v1';
+
+const defaultEntries = [
+  {
+    date: '2024-02-14',
+    title: 'Our first date',
+    details: 'A simple, beautiful evening that started this journey.'
+  },
+  {
+    date: '2024-05-03',
+    title: 'Sunset walk',
+    details: 'We walked by the water and talked for hours without noticing the time.'
+  },
+  {
+    date: '2024-09-21',
+    title: 'Movie night',
+    details: 'A cozy night in with snacks, laughter, and a perfect favorite movie.'
+  },
+  {
+    date: '2025-01-11',
+    title: 'Weekend getaway',
+    details: 'A short trip full of memories, pictures, and quiet happy moments.'
+  }
+];
+
+const memoryForm = document.getElementById('memoryForm');
+const memoryDate = document.getElementById('memoryDate');
+const memoryTitle = document.getElementById('memoryTitle');
+const memoryDetails = document.getElementById('memoryDetails');
+const memoryList = document.getElementById('memoryList');
+const totalCount = document.getElementById('totalCount');
+const latestDate = document.getElementById('latestDate');
+const resetBtn = document.getElementById('resetBtn');
+
+function getEntries() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (!saved) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultEntries));
+    return [...defaultEntries];
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) && parsed.length ? parsed : [...defaultEntries];
+  } catch (error) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultEntries));
+    return [...defaultEntries];
+  }
+}
+
+function sortEntries(entries) {
+  return [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString + 'T00:00:00');
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
+}
+
+function renderList() {
+  const entries = sortEntries(getEntries());
+
+  if (!entries.length) {
+    memoryList.innerHTML = '<li class="empty-state">No memories added yet. Start with your first one.</li>';
+    totalCount.textContent = '0';
+    latestDate.textContent = '—';
+    return;
+  }
+
+  memoryList.innerHTML = entries
+    .map(
+      (item) => `
+        <li class="memory-item">
+          <div class="memory-top">
+            <span class="memory-date">${formatDate(item.date)}</span>
+          </div>
+          <h3 class="memory-title">${escapeHtml(item.title)}</h3>
+          ${item.details ? `<p class="memory-detail">${escapeHtml(item.details)}</p>` : ''}
+        </li>
+      `
+    )
+    .join('');
+
+  totalCount.textContent = String(entries.length);
+  latestDate.textContent = formatDate(entries[0].date);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function saveEntries(entries) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+memoryForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const entry = {
+    date: memoryDate.value,
+    title: memoryTitle.value.trim(),
+    details: memoryDetails.value.trim()
+  };
+
+  if (!entry.date || !entry.title) {
+    return;
+  }
+
+  const entries = sortEntries(getEntries());
+  entries.unshift(entry);
+  saveEntries(entries);
+  renderList();
+
+  memoryForm.reset();
+  if (memoryDate) {
+    memoryDate.value = new Date().toISOString().split('T')[0];
+  }
+});
+
+resetBtn.addEventListener('click', () => {
+  saveEntries(defaultEntries);
+  renderList();
+});
+
+memoryDate.value = new Date().toISOString().split('T')[0];
+renderList();
