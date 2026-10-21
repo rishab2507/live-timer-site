@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Countdown Timer</title>
+    <meta name="description" content="A live countdown timer website with custom day selection." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="timer-card">
+        <p class="eyebrow">Live Countdown</p>
+        <h1 id="title">12-Day Timer</h1>
+
+        <div class="countdown" aria-live="polite">
+          <div class="time-box">
+            <span id="days">00</span>
+            <label>Days</label>
+          </div>
+          <div class="time-box">
+            <span id="hours">00</span>
+            <label>Hours</label>
+          </div>
+          <div class="time-box">
+            <span id="minutes">00</span>
+            <label>Minutes</label>
+          </div>
+          <div class="time-box">
+            <span id="seconds">00</span>
+            <label>Seconds</label>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label class="input-label" for="dayInput">Set countdown in days</label>
+          <div class="input-row">
+            <input id="dayInput" type="number" min="1" max="3650" step="1" value="12" aria-label="Number of days" />
+            <button id="startBtn" type="button">Start</button>
+          </div>
+        </div>
+
+        <p id="targetText" class="target-text">Countdown ends at: --</p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
